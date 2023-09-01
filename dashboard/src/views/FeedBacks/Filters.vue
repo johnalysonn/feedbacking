@@ -1,8 +1,8 @@
 <template>
     <div class="d-flex flex-column">
-        <p>Filtros</p>
+        <p class="fs-5 text-secondary-emphasis">Filtros</p>
 
-        <ul class="d-flex flex-column mt-3 list-unstyled">
+        <ul class="d-flex flex-column list-unstyled">
             <!-- <li
             v-for="filter in state.filters"
             :key="filter.label"
