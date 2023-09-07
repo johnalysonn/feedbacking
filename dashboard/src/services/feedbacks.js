@@ -6,13 +6,14 @@ export default httpClient => ({
     // todos os feedbacks
     getAll: async ({ type, limit, offset  } = defaultPagination) => {
         const query = { limit, offset}
-
         if(type) {
             query.type = type
         }
 
-        const response = await httpClient.get('/feedbacks', {params: query})
-
+        const response = await httpClient.get('/feedbacks/index', { 
+            params: query
+        })
+        console.log(response)
         return {
             data: response.data
         }

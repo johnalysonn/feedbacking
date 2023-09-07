@@ -1,17 +1,18 @@
 <template>
-    <!-- <span
+    <span
         :class="`bg-${classColor}`"
         
-        class="p-2 fw-bold text-uppercase text-white"
+        class="p-2 fw-bold text-uppercase text-white rounded-pill"
+        style="font-size: .5rem;"
     >
         {{label}}
-    </span> -->
-    <span        
+    </span>
+    <!-- <span        
         class="p-2 px-3 fw-bold text-uppercase text-white bg-danger rounded-pill"
         style="font-size: .5rem;"
     >
         problema
-    </span>
+    </span> -->
 </template>
 
 <script>
@@ -23,10 +24,10 @@ export default {
 
     setup(props){
         const label = computed(() => {
-            if (props.type === 'ISSUE') {
+            if (props.type === 'issue') {
                 return 'problema'
             }
-            if (props.type === 'IDEA') {
+            if (props.type === 'idea') {
                 return 'ideia'
             }  
             
@@ -34,10 +35,10 @@ export default {
         })
 
         const classColor = computed(() => {
-            if (props.type === 'ISSUE') {
+            if (props.type === 'issue') {
                 return 'danger'
             }
-            if (props.type === 'IDEA') {
+            if (props.type === 'idea') {
                 return 'warning'
             }  
             

@@ -10,7 +10,9 @@
                 <p class="fs-3 fw-bold">Listagem</p>
                 <suspense>
                     <template #default>
-                        <filters class="animate__animated animate__fadeInDown animate__faster"/>
+                        <filters 
+                        @select="changeFeedbackType"
+                        class="animate__animated animate__fadeInDown animate__faster"/>
                     </template>
                     <template #fallback>
                         <filters-loading class="mt-5"/>
@@ -23,24 +25,22 @@
                 v-if="state.hasError"
                 >Erro ao exibir os feedbacks 😢
                 </p>
-                <!-- <p 
+                <p 
                 class="text-center "
-                v-if="!state.feedbacks.length && !state.isLoading"
+                v-if="!state.feedbacks.length && !state.isLoading && !state.isLoadingFeedback"
                 >Nenhum feedback recebido 😎
-                </p> -->
+                </p>
 
-                <feedback-card-loading v-if="state.isLoading"/>
-                <!-- <feedback-card
+                <feedback-card-loading v-if="state.isLoading || state.isLoadingFeedbacks"/>
+
+                <feedback-card
                 v-else
                 v-for="(feedback, index) in state.feedbacks"
                 :key="feedback.id"
                 :is-opened="index === 0"
                 :feedback="feedback"
                 class="mb-3"
-                /> -->
-                <feedback-card v-else
-                :is-opened="true"/>
-                
+                />
             </div>
         </div>
     </div>
@@ -49,6 +49,7 @@
 import { onMounted, reactive } from 'vue'
 import HeaderLogged from '../../components/HeaderLogged'
 import Filters from './Filters'
+import services from '@/services'
 import FiltersLoading from './FiltersLoading'
 import FeedbackCardLoading from '../../components/FeedbackCard/Loading'
 import FeedbackCard from '../../components/FeedbackCard'
@@ -59,6 +60,7 @@ export default{
     setup (){
         const state = reactive({
             isLoading: false,
+            isLoadingFeedbacks: false,
             feedbacks: [],
             hasError: false,
             currentFeedbackType: '',
@@ -76,26 +78,44 @@ export default{
         }
 
         async function fetchFeedbacks(){
-            // try {
-            //     state.isLoading = true
+            try {
+                state.isLoading = true
 
-            //     const {data} = await services.feedbacks.getAll({
-            //         ...state.pagination,
-            //         type: state.currentFeedbackType
-            //     })
+                const {data} = await services.feedbacks.getAll()
 
-            //     state.feedbacks = data.results
-            //     state.pagination = data.pagination
-            //     state.isLoading = false
+                state.feedbacks = data.response
+                // state.pagination = data.pagination
+                state.isLoading = false
 
-            // } catch (error) {
-            //     handleError(error)
-            // }
+            } catch (error) {
+                handleError(error)
+            }
+        }
+        async function changeFeedbackType(type){
+            try {
+                state.isLoadingFeedbacks = true
+                state.currentFeedbackType = type
+                state.pagination.limit = 5
+                state.pagination.offset = 0
+
+                const {data} = await services.feedbacks.getAll({
+                    type,
+                    ...state.pagination
+                })
+
+                state.feedbacks = data.response
+                // state.pagination = data.pagination
+                state.isLoadingFeedbacks = false
+                
+            } catch (error) {
+                handleError(error)
+            }
         }
 
         return {
             state,
-            handleError
+            handleError,
+            changeFeedbackType
         }
     }
 }

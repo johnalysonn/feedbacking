@@ -117,6 +117,4 @@ class UserController extends Controller
             'apiKey' => $user->apiKey
         ]);
     }
-
-
 }

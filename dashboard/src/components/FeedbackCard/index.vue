@@ -1,20 +1,22 @@
 <template>
     <div
-    class="d-flex flex-column px-4 py-5 rounded"
+    class="d-flex flex-column px-4 py-4 rounded"
     style="background-color: #F9F9F9; cursor: pointer"
     @click="handleToggle"
     >
         <div
         class="d-flex justify-content-between align-items-center w-100 mb-4"
         >
-        <badge/>
-        <!-- <span>{{feedback.created_at}}</span> -->
+        <badge :type="state.feedback.type"/>
         <span
             class="text-secondary"
-            style="font-size: .9rem">{{getDiffTimeBetweenCurrentDate(109202300000)}}</span>
+            style="font-size: .9rem">{{getDiffTimeBetweenCurrentDate(feedback.created_at)}}</span>
         </div>
-        <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        <div 
+        class="fw-bold text-dark-emphasis"
+        style="font-size: 1.5rem;"
+        >
+            {{feedback.text}}
         </div>
         <div 
         :class="{
@@ -25,19 +27,25 @@
             <div 
                 class="d-flex flex-column gap-4">
                 <div class="d-flex flex-column">
-                    <span class="text-secondary text-uppercase fw-bold">página</span>
-                    <span>https://feedbacker.com/ajuda</span>
+                    <span class="text-secondary text-uppercase fw-bold"
+                    style="font-size: .9rem"
+                    >página</span>
+                    <span>{{feedback.page}}</span>
                 </div>
                 <div class="d-flex flex-column">
-                    <span class="text-secondary text-uppercase fw-bold">dispositivo</span>
-                    <span>Chrome 85.0, macOS 10.14</span>
+                    <span class="text-secondary text-uppercase fw-bold"
+                    style="font-size: .9rem"
+                    >dispositivo</span>
+                    <span>{{feedback.device}}</span>
                 </div>
             </div>
             <div 
                 class="">
                 <div class="d-flex flex-column">
-                    <span class="text-secondary text-uppercase fw-bold">usuário</span>
-                    <span>g9j0vLMEcN6Ffwxaplxp</span>
+                    <span class="text-secondary text-uppercase fw-bold"
+                    style="font-size: .9rem"
+                    >usuário</span>
+                    <span>{{feedback.fingerprint}}</span>
                 </div>
             </div>
         </div>
@@ -61,12 +69,13 @@ export default {
     components: { Badge },
     props: {
         isOpened: {type: Boolean, default: false},
-        feedbacks: { type: Object, required: true },
+        feedback: { type: Object, required: true },
     },
     setup(props){
         const state = reactive({
             isOpen: props.isOpened,
-            isClosing: !props.isOpened
+            isClosing: !props.isOpened,
+            feedback: props.feedback
         })
 
         async function handleToggle(){
@@ -74,6 +83,7 @@ export default {
 
             await wait(250)
             state.isClosing = false
+
             return state.isOpen = !state.isOpen
         }
 
