@@ -27,7 +27,7 @@
                 </p>
                 <p 
                 class="text-center "
-                v-if="!state.feedbacks.length && !state.isLoading && !state.isLoadingFeedback"
+                v-if="!state.feedbacks.length && !state.isLoading && !state.isLoadingFeedbacks"
                 >Nenhum feedback recebido 😎
                 </p>
 
@@ -64,6 +64,7 @@ export default{
             feedbacks: [],
             hasError: false,
             currentFeedbackType: '',
+            message: '',
             pagination: {
                 limit: 5,
                 offset: 0
@@ -74,14 +75,20 @@ export default{
             fetchFeedbacks()
         })
         function handleError(error){
+            // state.isLoadingFeedbacks = false
             state.hasError = !!error
         }
 
         async function fetchFeedbacks(){
             try {
                 state.isLoading = true
+                const paramToken_db = window.localStorage.getItem('token_db')
+                const paramToken = window.localStorage.getItem('token')
 
-                const {data} = await services.feedbacks.getAll()
+                const {data} = await services.feedbacks.getAll({
+                    paramToken,
+                    paramToken_db
+                })
 
                 state.feedbacks = data.response
                 // state.pagination = data.pagination
@@ -98,12 +105,23 @@ export default{
                 state.pagination.limit = 5
                 state.pagination.offset = 0
 
+                const paramToken_db = window.localStorage.getItem('token_db')
+                const paramToken = window.localStorage.getItem('token')
+                
                 const {data} = await services.feedbacks.getAll({
                     type,
-                    ...state.pagination
+                    ...state.pagination,
+                    paramToken,
+                    paramToken_db
                 })
 
                 state.feedbacks = data.response
+
+                if(data.response == undefined){
+                    state.feedbacks = []
+                }
+
+                state.message = data.message
                 // state.pagination = data.pagination
                 state.isLoadingFeedbacks = false
                 

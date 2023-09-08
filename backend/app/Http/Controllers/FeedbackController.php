@@ -25,13 +25,14 @@ class FeedbackController extends Controller
             }
 
             return response() -> json([
-                'error' => 'Não há feedbacks do tipo '.$type,
-            ], 404);
+                'message' => 'Não há feedbacks do tipo '.$type,
+            ]);
 
         }
         $feedbacks = Feedback::all();
 
         return response() -> json([
+            'request' => $request->all(),
             'message' => 'Feedbacks exibidos com sucesso',
             'response' => FeedbackResource::collection($feedbacks)
         ]);

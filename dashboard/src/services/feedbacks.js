@@ -1,19 +1,28 @@
+import axios from 'axios'
+
 const defaultPagination = {
     limit: 5,
     offset: 0
 }
+
 export default httpClient => ({
     // todos os feedbacks
-    getAll: async ({ type, limit, offset  } = defaultPagination) => {
-        const query = { limit, offset}
+    getAll: async ({ type, limit, offset, paramToken, paramToken_db  } = defaultPagination) => {
+        const query = { limit, offset, token: paramToken_db}
+        const headers = {'Authorization': `Bearer ${paramToken}`}
+        const url = 'http://127.0.0.1:8000/api/feedbacks/index'
         if(type) {
             query.type = type
         }
-
-        const response = await httpClient.get('/feedbacks/index', { 
-            params: query
+        const response = await axios({
+            method: 'get',
+            url: url,
+            params: query,
+            headers: {
+                Authorization: 'Bearer ' + paramToken
+            }
         })
-        console.log(response)
+
         return {
             data: response.data
         }
@@ -25,5 +34,5 @@ export default httpClient => ({
         return {
             data: response.data
         }
-    }
+    },
 })
