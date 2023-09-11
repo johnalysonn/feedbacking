@@ -27,7 +27,7 @@
                 </p>
                 <p 
                 class="text-center "
-                v-if="!state.feedbacks.length && !state.isLoading && !state.isLoadingFeedbacks"
+                v-if="!state.feedbacks.length && !state.isLoading && !state.isLoadingFeedbacks && !state.hasError"
                 >Nenhum feedback recebido 😎
                 </p>
 
@@ -41,12 +41,15 @@
                 :feedback="feedback"
                 class="mb-3"
                 />
+
+                <feedback-card-loading v-if="state.isLoadingMoreFeedbacks"/>
+
             </div>
         </div>
     </div>
 </template>
 <script>
-import { onMounted, reactive } from 'vue'
+import { onErrorCaptured, onMounted, onUnmounted, reactive } from 'vue'
 import HeaderLogged from '../../components/HeaderLogged'
 import Filters from './Filters'
 import services from '@/services'
@@ -61,22 +64,70 @@ export default{
         const state = reactive({
             isLoading: false,
             isLoadingFeedbacks: false,
+            isLoadingMoreFeedbacks: false,
             feedbacks: [],
             hasError: false,
             currentFeedbackType: '',
             message: '',
             pagination: {
                 limit: 5,
-                offset: 0
+                offset: 0,
+                total: 0
             }
         })
+        onErrorCaptured(handleError)
 
         onMounted(() => {
             fetchFeedbacks()
+
+            window.addEventListener('scroll', handleScroll, false)
         })
+        onUnmounted(() => {
+            window.removeEventListener('scroll', handleScroll, false)
+        })
+
         function handleError(error){
-            // state.isLoadingFeedbacks = false
+            state.isLoadingFeedbacks = false
+            state.isLoading = false
+            state.isLoadingMoreFeedbacks = false
             state.hasError = !!error
+        }
+
+        async function handleScroll(){
+            const isBottomOfWindow = Math.ceil(
+                document.documentElement.scrollTop + window.innerHeight
+            ) >= document.documentElement.scrollHeight
+            
+            if(state.isLoading || state.isLoadingMoreFeedbacks) return
+            if(!isBottomOfWindow) return
+            if(state.feedbacks.length <= state.pagination.total) return
+
+            try {
+                
+                state.isLoadingMoreFeedbacks = true
+                const paramToken_db = window.localStorage.getItem('token_db')
+                const paramToken = window.localStorage.getItem('token')
+
+                const {data} = await services.feedbacks.getAll({
+                    paramToken,
+                    paramToken_db,
+                    ...state.pagination,
+                    type: state.currentFeedbackType,
+                    offset: (state.pagination.offset + 5)
+                })
+
+                if(data.results.length){
+                    state.feedbacks.push(...data.response)
+                }
+
+                state.isLoadingMoreFeedbacks = false
+                state.pagination = data.pagination
+                
+
+            } catch (error) {
+                state.isLoadingMoreFeedbacks = false
+                handleError(error)
+            }
         }
 
         async function fetchFeedbacks(){

@@ -13,13 +13,35 @@ class FeedbackController extends Controller
      */
     public function index(Request $request)
     {
+        $pagination = [
+            'limit' => 0,
+            'offset' => 0,
+            'total' => 0
+        ];
+
         if($request->type){
             $type = $request->type;
+
             $feedbacks = Feedback::where('type', $type)->get();
+
+            if($request -> limit){
+                $pagination['limit'] = $request -> limit;
+                $pagination['offset'] = $request->offset;
+                $allFeedbacks =  Feedback::where('type', $type) -> get();
+                $feedbacks = Feedback::where('type', $type)->skip($pagination['offset'])->take($pagination['limit'])->get();
+
+                $pagination['total'] = $allFeedbacks->count();
+                if($feedbacks->count() <= 0){
+                    return response() -> json([
+                        'message' => 'Não há mais feedbacks do tipo '.$type.' ou esse tipo não existe',
+                    ]);
+                }
+            }
 
             if($feedbacks->count() > 0){
                 return response() -> json([
                     'message' => 'Feedbacks do tipo '.$type.' exibidos com sucesso',
+                    'pagination' => $pagination,
                     'response' => FeedbackResource::collection($feedbacks),
                 ]);
             }
@@ -31,24 +53,31 @@ class FeedbackController extends Controller
         }
         $feedbacks = Feedback::all();
 
+        if($request -> limit){
+            $pagination['limit'] = $request -> limit;
+            $pagination['offset'] = $request->offset;
+
+            $allFeedbacks = Feedback::all();
+
+            $pagination['total'] = $allFeedbacks->count();
+            $feedbacks = Feedback::skip($pagination['offset'])->take($pagination['limit'])->get();
+
+            if($feedbacks->count() <= 0){
+                return response() -> json([
+                    'message' => 'Não há mais feedbacks',
+                ]);
+            }
+        }
+
         return response() -> json([
             'request' => $request->all(),
             'message' => 'Feedbacks exibidos com sucesso',
+            'pagination' => $pagination,
             'response' => FeedbackResource::collection($feedbacks)
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -64,7 +93,7 @@ class FeedbackController extends Controller
         $data['apiKey'] = $user->apiKey;
         $data['user_id'] = $user->id;
 
-        if($data['type'] !== 'issue' || $data['type'] !== 'idea' || $data['type'] !== 'other'){
+        if($data['type'] !== 'issue' && $data['type'] !== 'idea' && $data['type'] !== 'other'){
             return response() -> json([
                 'Error' => 'Tipo de feedback '. $data['type'].' não aceito',
                 'Status' => 400
@@ -83,37 +112,7 @@ class FeedbackController extends Controller
         ], 400);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Feedback $feedback)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Feedback $feedback)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Feedback $feedback)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Feedback $feedback)
-    {
-        //
-    }
     public function summary(){
         $feedbacks = Feedback::all();
         $feedbacks_issue = Feedback::where('type', 'issue')->get();
