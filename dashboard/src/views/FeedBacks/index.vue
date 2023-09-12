@@ -100,7 +100,7 @@ export default{
             
             if(state.isLoading || state.isLoadingMoreFeedbacks) return
             if(!isBottomOfWindow) return
-            if(state.feedbacks.length <= state.pagination.total) return
+            if(state.feedbacks.length >= state.pagination.total) return
 
             try {
                 
@@ -116,7 +116,7 @@ export default{
                     offset: (state.pagination.offset + 5)
                 })
 
-                if(data.results.length){
+                if(data.response.length){
                     state.feedbacks.push(...data.response)
                 }
 
@@ -142,7 +142,7 @@ export default{
                 })
 
                 state.feedbacks = data.response
-                // state.pagination = data.pagination
+                state.pagination = data.pagination
                 state.isLoading = false
 
             } catch (error) {
@@ -173,7 +173,7 @@ export default{
                 }
 
                 state.message = data.message
-                // state.pagination = data.pagination
+                state.pagination = data.pagination
                 state.isLoadingFeedbacks = false
                 
             } catch (error) {
