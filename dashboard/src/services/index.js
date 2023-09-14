@@ -4,6 +4,7 @@ import router from '../router'
 import UsersService from './users'
 import FeedbacksService from './feedbacks'
 import { setGlobalLoading } from '../store/global'
+import {wait} from '../utils/timeout'
 
 const API_ENVS = {
     production: '',
@@ -16,6 +17,7 @@ const httpClient = axios.create({
 })
 
 httpClient.interceptors.request.use(config => {
+    // console.log(typeof(wait(100)))
     setGlobalLoading(true)
     const token = window.localStorage.getItem('token')
     const token_db = window.localStorage.getItem('token_db')
